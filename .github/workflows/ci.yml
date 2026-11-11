@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nginx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate HTTP config
+        run: |
+          docker run --rm -v "$PWD:/cfg:ro" nginx:alpine sh -c '
+            mkdir -p /etc/nginx/snippets &&
+            cp /cfg/default.conf /etc/nginx/conf.d/default.conf &&
+            cp /cfg/locations.conf /etc/nginx/snippets/mc-locations.conf &&
+            nginx -t
+          '
